@@ -206,7 +206,7 @@ Point.prototype.distanceTo = function(point) {
 */
 Point.prototype.addPoint = function(point) {
   return new Point(this.x + point.x, this.y + point.y);
-}
+};
 
 /*
   Method: substractPoint
@@ -278,6 +278,13 @@ Point.prototype.toStyles = function() {
     left: parseInt(this.x) + 'px',
     top: parseInt(this.y) + 'px'
   };
+};
+
+/*
+  Point equality
+*/
+Point.prototype.equals = function (other) {
+  return this.x == other.x && this.y == other.y;
 };
 
 /*
