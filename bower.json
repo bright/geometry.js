@@ -1,0 +1,25 @@
+{
+  "name": "geometry.js",
+  "main": ["./geometry.js"],
+  "version": "0.1.0",
+  "homepage": "https://github.com/jnordberg/geometry.js",
+  "authors": [
+    "Johan Nordberg <its@johan-nordberg.com>"
+  ],
+  "description": "JavaScript library for working with objects in a two-dimensional coordinate system.",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "geometry",
+    "coordinate",
+    "euclid"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "geometry-mootols.js"
+  ]
+}
