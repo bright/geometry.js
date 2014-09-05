@@ -10,14 +10,21 @@
 
 function pick() {
   for (var i = 0; i < arguments.length; i++) {
-    if (arguments[i] !== undefined) return arguments[i];
+    if (arguments[i] !== undefined) {
+      return arguments[i];
+    }
   }
 };
 
 function merge(o1, o2) {
-  var key, rv = {};
-  for (key in o1) rv[key] = o1[key];
-  for (key in o2) rv[key] = o2[key];
+  var key,
+      rv = {};
+  for (key in o1) {
+    rv[key] = o1[key];
+  }
+  for (key in o2) {
+    rv[key] = o2[key];
+  }
   return rv;
 };
 
@@ -91,11 +98,14 @@ Size.prototype.standardize = function() {
   A <Size> scaled to the size given with aspect ratio intact.
 */
 Size.prototype.aspectFit = function(size, keepInside) {
-  if (keepInside === undefined) keepInside = true;
+  if (keepInside === undefined) {
+    keepInside = true;
+  }
   var nw = size.height * this.width / this.height;
   var nh = size.width * this.height / this.width;
-  if (keepInside ^ (nw >= size.width))
+  if (keepInside ^ (nw >= size.width)) {
     return new Size(nw || 1, size.height);
+  }
   return new Size(size.width, nh || 1);
 };
 
@@ -119,8 +129,8 @@ Size.prototype.scale = function(factor) {
 */
 Size.prototype.toStyles = function() {
   return {
-    'width': parseInt(this.width) + 'px',
-    'height': parseInt(this.height) + 'px'
+    width: parseInt(this.width) + 'px',
+    height: parseInt(this.height) + 'px'
   };
 };
 
@@ -265,8 +275,8 @@ Point.prototype.angle = function(point) {
 */
 Point.prototype.toStyles = function() {
   return {
-    'left': parseInt(this.x) + 'px',
-    'top': parseInt(this.y) + 'px'
+    left: parseInt(this.x) + 'px',
+    top: parseInt(this.y) + 'px'
   };
 };
 
@@ -416,7 +426,7 @@ Rect.prototype.containsPoint = function(point) {
 */
 Rect.prototype.containsRect = function(rect) {
   var p1 = rect.origin, p2 = rect.getMax();
-  return (this.containsPoint(p1) && this.containsPoint(p2));
+  return this.containsPoint(p1) && this.containsPoint(p2);
 };
 
 /*
@@ -502,17 +512,15 @@ Rect.prototype.toString = function() {
   the root object
 */
 var geometry = {
-  'Size': Size,
-  'Point': Point,
-  'Rect': Rect
+  Size: Size,
+  Point: Point,
+  Rect: Rect
 };
 
 if (typeof define == 'function') {
   define(function() { return geometry; });
 } else {
-  for (var key in geometry) {
-    this[key] = geometry[key];
-  }
+  this.Geometry = geometry;
 }
 
-}).apply((typeof exports != 'undefined') ? exports : this);
+}).apply((typeof exports !== 'undefined') ? exports : this);
