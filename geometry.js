@@ -520,6 +520,73 @@
     };
 
     /*
+     Class: Polygon
+     An object that contains the shape of a polygon.
+
+     Constructor: Polygon
+
+     Arguments:
+
+     vertices - An array of <Point> objects that specifies the coordinates of the
+         subsequent polygon's vertices, without repeating the first one at the end.
+     */
+    var Polygon = function (vertices) {
+        this.vertices = vertices;
+    };
+
+    /*
+     Method: containsPoint
+
+     Returns whether a polygon contains a specified point.
+     Based on ray-casting algorithm.
+     https://github.com/substack/point-in-polygon/blob/master/index.js
+     http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+     Arguments:
+
+     point - The <Point> to examine.
+
+     Returns:
+
+     true if the polygon is not null or empty and the point is
+     located within the polygon; otherwise, false.
+     */
+    Polygon.prototype.containsPoint = function (point) {
+        var x = point[0],
+            y = point[1];
+
+        var inside = false;
+        for (var i = 0, j = this.vertices.length - 1; i < this.vertices.length; j = i++) {
+            var xi = this.vertices[i][0], yi = this.vertices[i][1];
+            var xj = this.vertices[j][0], yj = this.vertices[j][1];
+
+            var intersect = ((yi > y) != (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    };
+
+    /*
+     Method: toString
+
+     Returns string representation of the polygon
+     */
+    Polygon.prototype.toString = function () {
+        var parts = ['<Polygon '];
+
+        for (var i = 0; i < this.vertices.length; ++i) {
+            parts.push(this.vertices[i].toString());
+        }
+
+        parts.push('>');
+        return parts.join('');
+    };
+
+    /*
      Packaging
 
      Uses commonjs's export or require.js's define, otherwise just appends to
@@ -528,7 +595,8 @@
     var geometry = {
         Size: Size,
         Point: Point,
-        Rect: Rect
+        Rect: Rect,
+        Polygon: Polygon
     };
 
     if (typeof define == 'function') {
