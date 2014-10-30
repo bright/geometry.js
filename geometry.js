@@ -216,19 +216,19 @@
     };
 
     /*
-     Method: substractPoint
+     Method: subtractPoint
 
      Substracts a point from this point.
 
      Arguments:
 
-     point - Point to substract
+     point - Point to subtract
 
      Returns:
 
-     <Point> containing substracted point.
+     <Point> containing subtracted point.
      */
-    Point.prototype.substractPoint = function (point) {
+    Point.prototype.subtractPoint = function (point) {
         return new Point(this.x - point.x, this.y - point.y);
     };
 
@@ -354,7 +354,7 @@
     Rect.fromPoints = function (point1, point2) {
         return new Rect({
             origin: point1,
-            size: Size.fromPoint(point2.substractPoint(point1))
+            size: Size.fromPoint(point2.subtractPoint(point1))
         });
     };
 
@@ -555,8 +555,8 @@
 
      */
     var isLeftOf = function (left, right, test) {
-        var tmp1 = right.substractPoint(left);
-        var tmp2 = test.substractPoint(right);
+        var tmp1 = right.subtractPoint(left);
+        var tmp2 = test.subtractPoint(right);
 
         var x = (tmp1.x * tmp2.y) - (tmp1.y * tmp2.x);
 
