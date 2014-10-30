@@ -535,6 +535,63 @@
     };
 
     /*
+     Method: Polygon.fromRect
+
+     *Classmethod* Creates a Polygon from a rectangle
+     */
+    Polygon.fromRect = function (rect) {
+        return new Polygon([
+            rect.origin,
+            new Point(rect.origin.x, rect.origin.y + rect.size.height),
+            rect.getMax(),
+            new Point(rect.origin.x + rect.size.width, rect.origin.y)
+        ]);
+    };
+
+    /*
+     Method: normalize
+
+     Returns rectangle with vertices in clockwise order
+
+     */
+    var isLeftOf = function (left, right, test) {
+        var tmp1 = right.substractPoint(left);
+        var tmp2 = test.substractPoint(right);
+
+        var x = (tmp1.x * tmp2.y) - (tmp1.y * tmp2.x);
+
+        if (x < 0) {
+            return false;
+        }
+        if (x > 0) {
+            return true;
+        }
+
+        // else - colinear points
+    };
+
+    var areVerticesClockwise = function (vertices) {
+        for (var i = 2; i < vertices.length; i++) {
+            var isLeft = isLeftOf(vertices[0], vertices[1], vertices[i]);
+            if (isLeft !== undefined) {
+                return !isLeft;
+            }
+        }
+
+        throw new Error('All the points in the polygon are colinear');
+    };
+
+    Polygon.prototype.normalize = function () {
+        var verticesCopy = this.vertices.slice();
+
+        if (!areVerticesClockwise(verticesCopy)) {
+            verticesCopy.reverse();
+        }
+
+        return new Polygon(verticesCopy);
+    };
+
+    /*
      Method: containsPoint
 
      Returns whether a polygon contains a specified point.
@@ -552,22 +609,106 @@
      located within the polygon; otherwise, false.
      */
     Polygon.prototype.containsPoint = function (point) {
-        var x = point[0],
-            y = point[1];
-
         var inside = false;
         for (var i = 0, j = this.vertices.length - 1; i < this.vertices.length; j = i++) {
-            var xi = this.vertices[i][0], yi = this.vertices[i][1];
-            var xj = this.vertices[j][0], yj = this.vertices[j][1];
+            var xi = this.vertices[i].x,
+                yi = this.vertices[i].y,
+                xj = this.vertices[j].x,
+                yj = this.vertices[j].y;
 
-            var intersect = ((yi > y) != (yj > y))
-                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            var intersect = ((yi > point.y) != (yj > point.y))
+                && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+
             if (intersect) {
                 inside = !inside;
             }
         }
 
         return inside;
+    };
+
+    /*
+     Method: intersectsPolygon
+
+     Returns whether two polygons intersect.
+     Using Sutherland–Hodgman clipping algorithm
+     http://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#JavaScript
+
+     Arguments:
+
+     polygon - The <Polygon> to examine.
+
+     Returns:
+
+     true if the specified polygons intersect; otherwise, false.
+     */
+    Polygon.prototype.intersectsPolygon = function (polygon) {
+        var first = this.normalize(),
+            second = polygon.normalize();
+
+        var secondEdgeStart, secondEdgeEnd, firstEdgeStart, firstEdgeEnd;
+
+        var inside = function (point) {
+            return (secondEdgeEnd.x - secondEdgeStart.x) * (secondEdgeStart.y - point.y) >= (secondEdgeStart.y - secondEdgeEnd.y) * (point.x - secondEdgeStart.x);
+        };
+
+        var intersection = function () {
+            var sizeFirst = { width: firstEdgeStart.x - firstEdgeEnd.x, height: firstEdgeEnd.y - firstEdgeStart.y },
+                sizeSecond = { width: secondEdgeStart.x - secondEdgeEnd.x, height: secondEdgeEnd.y - secondEdgeStart.y },
+                n1 = (secondEdgeStart.y * secondEdgeEnd.x) - (secondEdgeStart.x * secondEdgeEnd.y),
+                n2 = (firstEdgeStart.y * firstEdgeEnd.x) - (firstEdgeStart.x * firstEdgeEnd.y),
+                n3 = 1.0 / (sizeSecond.width * sizeFirst.height - sizeSecond.width * sizeFirst.height);
+
+            return {
+                x: ((n1 * sizeFirst.width) - (n2 * sizeSecond.width)) * n3,
+                y: ((n1 * sizeFirst.height) - (n2 * sizeSecond.height)) * n3
+            };
+        };
+
+        var outputList = first.vertices;
+        secondEdgeStart = second.vertices[second.vertices.length - 1];
+
+        for (var j = 0; j < second.vertices.length; ++j) {
+            secondEdgeEnd = second.vertices[j];
+
+            var inputList = outputList;
+            outputList = [];
+
+            firstEdgeStart = inputList[inputList.length - 1];
+            for (var i = 0; i < inputList.length; ++i) {
+                firstEdgeEnd = inputList[i];
+                if (inside(firstEdgeEnd)) {
+                    if (!inside(firstEdgeStart)) {
+                        outputList.push(intersection());
+                    }
+                    outputList.push(firstEdgeEnd);
+                }
+                else if (inside(firstEdgeStart)) {
+                    outputList.push(intersection());
+                }
+                firstEdgeStart = firstEdgeEnd;
+            }
+            secondEdgeStart = secondEdgeEnd;
+        }
+
+        return !!outputList.length;
+    };
+
+    /*
+     Method: intersectsRect
+
+     Returns whether a polygon intersects with a rectangle.
+
+     Arguments:
+
+     rect - The <Rect> to examine.
+
+     Returns:
+
+     true if the specified rectangle intersects with a polygon; otherwise, false.
+     */
+    Polygon.prototype.intersectsRect = function (rect) {
+        return this.intersectsPolygon(Polygon.fromRect(rect));
     };
 
     /*
