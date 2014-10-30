@@ -1,6 +1,6 @@
 {
   "name": "geometry",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Johan Nordberg <its@johan-nordberg.com>",
   "description": "JavaScript library for working with objects in a two-dimensional coordinate system.",
   "main": "geometry.js",
