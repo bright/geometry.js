@@ -1,7 +1,7 @@
 {
   "name": "geometry.js",
   "main": ["./geometry.js"],
-  "version": "0.1.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/jnordberg/geometry.js",
   "authors": [
     "Johan Nordberg <its@johan-nordberg.com>"
