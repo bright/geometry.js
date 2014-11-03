@@ -630,65 +630,65 @@
     /*
      Method: intersectsPolygon
 
-     Returns whether two polygons intersect.
+     Returns whether the polygon intersects with convex polygon given.
      Using Sutherland–Hodgman clipping algorithm
      http://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#JavaScript
 
      Arguments:
 
-     polygon - The <Polygon> to examine.
+     polygon - The <Polygon> to examine. Needs to be convex.
 
      Returns:
 
      true if the specified polygons intersect; otherwise, false.
      */
     Polygon.prototype.intersectsPolygon = function (polygon) {
-        var first = this.normalize(),
-            second = polygon.normalize();
+        var subject = this.normalize(),
+            clip = polygon.normalize();
 
-        var secondEdgeStart, secondEdgeEnd, firstEdgeStart, firstEdgeEnd;
+        var clipEdgeStart, clipEdgeEnd, subjectEdgeStart, subjectEdgeEnd;
 
         var inside = function (point) {
-            return (secondEdgeEnd.x - secondEdgeStart.x) * (secondEdgeStart.y - point.y) >= (secondEdgeStart.y - secondEdgeEnd.y) * (point.x - secondEdgeStart.x);
+            return (clipEdgeEnd.x - clipEdgeStart.x) * (clipEdgeStart.y - point.y) >= (clipEdgeStart.y - clipEdgeEnd.y) * (point.x - clipEdgeStart.x);
         };
 
         var intersection = function () {
-            var sizeFirst = { width: firstEdgeStart.x - firstEdgeEnd.x, height: firstEdgeEnd.y - firstEdgeStart.y },
-                sizeSecond = { width: secondEdgeStart.x - secondEdgeEnd.x, height: secondEdgeEnd.y - secondEdgeStart.y },
-                n1 = (secondEdgeStart.y * secondEdgeEnd.x) - (secondEdgeStart.x * secondEdgeEnd.y),
-                n2 = (firstEdgeStart.y * firstEdgeEnd.x) - (firstEdgeStart.x * firstEdgeEnd.y),
-                n3 = 1.0 / (sizeSecond.width * sizeFirst.height - sizeSecond.width * sizeFirst.height);
+            var clipSize = { width: clipEdgeStart.x - clipEdgeEnd.x, height: clipEdgeEnd.y - clipEdgeStart.y },
+                subjectSize = { width: subjectEdgeStart.x - subjectEdgeEnd.x, height: subjectEdgeEnd.y - subjectEdgeStart.y },
+                n1 = (clipEdgeStart.y * clipEdgeEnd.x) - (clipEdgeStart.x * clipEdgeEnd.y),
+                n2 = (subjectEdgeStart.y * subjectEdgeEnd.x) - (subjectEdgeStart.x * subjectEdgeEnd.y),
+                n3 = 1.0 / ((clipSize.width * subjectSize.height) - (clipSize.height * subjectSize.width));
 
             return {
-                x: ((n1 * sizeFirst.width) - (n2 * sizeSecond.width)) * n3,
-                y: ((n1 * sizeFirst.height) - (n2 * sizeSecond.height)) * n3
+                x: ((n1 * subjectSize.width) - (n2 * clipSize.width)) * n3,
+                y: ((n1 * subjectSize.height) - (n2 * clipSize.height)) * n3
             };
         };
 
-        var outputList = first.vertices;
-        secondEdgeStart = second.vertices[second.vertices.length - 1];
+        var outputList = subject.vertices;
+        clipEdgeStart = clip.vertices[clip.vertices.length - 1];
 
-        for (var j = 0; j < second.vertices.length; ++j) {
-            secondEdgeEnd = second.vertices[j];
+        for (var j = 0; j < clip.vertices.length; ++j) {
+            clipEdgeEnd = clip.vertices[j];
 
             var inputList = outputList;
             outputList = [];
 
-            firstEdgeStart = inputList[inputList.length - 1];
+            subjectEdgeStart = inputList[inputList.length - 1];
             for (var i = 0; i < inputList.length; ++i) {
-                firstEdgeEnd = inputList[i];
-                if (inside(firstEdgeEnd)) {
-                    if (!inside(firstEdgeStart)) {
+                subjectEdgeEnd = inputList[i];
+                if (inside(subjectEdgeEnd)) {
+                    if (!inside(subjectEdgeStart)) {
                         outputList.push(intersection());
                     }
-                    outputList.push(firstEdgeEnd);
+                    outputList.push(subjectEdgeEnd);
                 }
-                else if (inside(firstEdgeStart)) {
+                else if (inside(subjectEdgeStart)) {
                     outputList.push(intersection());
                 }
-                firstEdgeStart = firstEdgeEnd;
+                subjectEdgeStart = subjectEdgeEnd;
             }
-            secondEdgeStart = secondEdgeEnd;
+            clipEdgeStart = clipEdgeEnd;
         }
 
         return !!outputList.length;
